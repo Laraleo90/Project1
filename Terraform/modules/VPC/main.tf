@@ -1,0 +1,55 @@
+##### Create the network infrastructure #####
+
+# Main VPC
+resource "aws_vpc" "vpc" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "Project1_vpc_lara"
+  }
+}
+
+## Puclic subnet 
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "var.availability_zone"
+
+  tags = {
+    Name = "publicSN_lara"
+  }
+}
+
+
+## Private subnet
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = false
+  availability_zone       = "var.availability_zone"
+
+  tags = {
+    Name = "privateSN_lara"
+  }
+}
+
+# Internet Gateway
+resource "aws_internet_gateway" "IGW_lara" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "IGW_lara"
+  }
+}
+
+## Public Route table
+resource "aws_route_table" "RT_lara" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "RT_lara"
+  }
+}
