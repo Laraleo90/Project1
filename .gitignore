@@ -1,5 +1,7 @@
 ####### Terraform ######
 .terraform/
-terraform.tfstate*
-.pem
-.ftvars
+*terraform.tfstate*
+*.ftvars
+
+###### Private keys ######
+*.pem
