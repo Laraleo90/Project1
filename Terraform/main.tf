@@ -3,7 +3,7 @@ terraform {
   required_version = ">= 1.8.0"
 }
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 # Data 
 data "aws_ami" "ubuntu" {
