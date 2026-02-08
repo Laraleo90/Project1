@@ -43,7 +43,7 @@ resource "aws_security_group" "sg1" {
   }
 
   tags = {
-    Name = "Vote-Result-SG-lara"
+    Name = "sg1-Vote-Result-lara"
   }
 }
 
@@ -60,6 +60,7 @@ resource "aws_security_group" "sg2" {
     to_port         = 6379
     protocol        = "tcp"
     description     = "Redis access from web apps"
+    security_groups = [aws_security_group.sg1.id] 
   }
 
   # SSH for management
@@ -79,7 +80,7 @@ resource "aws_security_group" "sg2" {
   }
 
   tags = {
-    Name = "Redis-Worker-SG-lara"
+    Name = "sg2-Redis-Worker-lara"
   }
 }
 
@@ -96,6 +97,7 @@ resource "aws_security_group" "sg3" {
     to_port         = 5432
     protocol        = "tcp"
     description     = "PostgreSQL access from web apps"
+    security_groups = [aws_security_group.sg2.id] 
   }
 
   # SSH
@@ -115,6 +117,6 @@ resource "aws_security_group" "sg3" {
   }
 
   tags = {
-    Name = "Postgres-SG-lara"
+    Name = "sg3-Postgres-lara"
   }
 }

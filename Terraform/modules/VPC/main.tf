@@ -1,6 +1,6 @@
 ##### Create the network infrastructure #####
 
-# Main VPC
+## Main VPC
 resource "aws_vpc" "vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -36,7 +36,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-# Internet Gateway
+## Internet Gateway
 resource "aws_internet_gateway" "IGW_lara" {
   vpc_id = aws_vpc.vpc.id
 
@@ -49,7 +49,18 @@ resource "aws_internet_gateway" "IGW_lara" {
 resource "aws_route_table" "RT_lara" {
   vpc_id = aws_vpc.vpc.id
 
+route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.IGW_lara.id  # Use your IGW name
+  }
+
   tags = {
     Name = "RT_lara"
   }
+}
+
+## Associate public subnet with route table
+resource "aws_route_table_association" "public_association" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.RT_lara.id
 }
