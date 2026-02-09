@@ -1,66 +1,39 @@
-##### Outputs for instances #####
+##### EC2 Module Outputs #####
 
-# Frontend
-output "instance_id1" {
-  description = "ID of the EC2 instance"
+# Frontend Server Outputs
+output "frontend_instance_id" {
+  description = "Frontend server instance ID"
   value       = aws_instance.frontendserver.id
 }
 
-output "instance_public_ip1" {
-  description = "Public IP of the EC2 instance"
+output "frontend_public_ip" {
+  description = "Frontend server public IP"
   value       = aws_instance.frontendserver.public_ip
 }
 
-output "instance_public_dns1" {
-  description = "Public DNS of the EC2 instance"
-  value       = aws_instance.frontendserver.public_dns
+output "frontend_private_ip" {
+  description = "Frontend server private IP"
+  value       = aws_instance.frontendserver.private_ip
 }
 
-output "ami_id1" {
-  description = "AMI ID used for the instance"
-  value       = aws_instance.frontendserver.ami
-}
-
-
-# Backend
-output "instance_id2" {
-  description = "ID of the EC2 instance"
+# Backend Server Outputs
+output "backend_instance_id" {
+  description = "Backend server instance ID"
   value       = aws_instance.backendserver.id
 }
 
-output "instance_public_ip2" {
-  description = "Public IP of the EC2 instance"
-  value       = aws_instance.backendserver.public_ip
+output "backend_private_ip" {
+  description = "Backend server private IP"
+  value       = aws_instance.backendserver.private_ip
 }
 
-output "instance_public_dns2" {
-  description = "Public DNS of the EC2 instance"
-  value       = aws_instance.backendserver.public_dns
-}
-
-output "ami_id2" {
-  description = "AMI ID used for the instance"
-  value       = aws_instance.backendserver.ami
-}
-
-
-# DB
-output "instance_id3" {
-  description = "ID of the EC2 instance"
+# Database Server Outputs
+output "db_instance_id" {
+  description = "Database server instance ID"
   value       = aws_instance.dbserver.id
 }
 
-output "instance_public_ip3" {
-  description = "Public IP of the EC2 instance"
-  value       = aws_instance.dbserver.public_ip
-}
-
-output "instance_public_dns3" {
-  description = "Public DNS of the EC2 instance"
-  value       = aws_instance.dbserver.public_dns
-}
-
-output "ami_id3" {
-  description = "AMI ID used for the instance"
-  value       = aws_instance.dbserver.ami
+output "db_private_ip" {
+  description = "Database server private IP"
+  value       = aws_instance.dbserver.private_ip
 }

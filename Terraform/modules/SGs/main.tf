@@ -65,12 +65,12 @@ resource "aws_security_group" "sg2" {
 
   # SSH for management
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
-    description = "SSH access - restricted to my IP"
-  }
+  from_port       = 22
+  to_port         = 22
+  protocol        = "tcp"
+  description     = "SSH from frontend (bastion)"
+  security_groups = [aws_security_group.sg1.id]
+}
 
   egress {
     from_port   = 0
@@ -102,13 +102,13 @@ resource "aws_security_group" "sg3" {
 
   # SSH
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
-    description = "SSH access - restricted to my IP"
-  }
-
+  from_port       = 22
+  to_port         = 22
+  protocol        = "tcp"
+  description     = "SSH from frontend (bastion)"
+  security_groups = [aws_security_group.sg1.id]
+}
+  
   egress {
     from_port   = 0
     to_port     = 0
