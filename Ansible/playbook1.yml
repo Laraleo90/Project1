@@ -1,0 +1,195 @@
+---
+- name: Ping all Servers
+  hosts: all
+  tasks:
+    - name: Ping all servers to check connectivity
+      ansible.builtin.ping:
+
+- name: Install Docker CE on Ubuntu 20.04
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Create keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Remove old Docker source list if it exists
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/docker.list
+        state: absent
+
+    - name: Add Docker repository
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/docker.list
+        content: |
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+
+    - name: Update apt cache after adding Docker repo
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Docker and plugins
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Ensure docker group exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add ubuntu user to docker group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+- name: Deploy Frontend Docker Images
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Pull voting app image
+      community.docker.docker_image:
+        name: laraleo/project1:voting-app
+        source: pull
+        tag: latest
+        platform: linux/amd64
+
+    - name: Pull result app image
+      community.docker.docker_image:
+        name: laraleo/project1:result-app
+        source: pull
+        tag: latest
+        platform: linux/amd64
+
+- name: Deploy Backend Docker images
+  hosts: backend
+  become: yes
+  tasks:
+    - name: Pull Redis image
+      community.docker.docker_image:
+        name: redis
+        source: pull
+        tag: latest
+
+    - name: Pull worker app image
+      community.docker.docker_image:
+        name: laraleo/project1:worker-app
+        source: pull
+        tag: latest
+        platform: linux/amd64
+
+- name: Deploy database Docker image
+  hosts: db
+  become: yes
+  tasks:
+    - name: Pull PostgreSQL image
+      community.docker.docker_image:
+        name: postgres
+        source: pull
+        tag: latest
+
+
+## Run the containers
+- name: Start container Redis
+  hosts: backend
+  become: yes
+  tasks:
+    - name: Start Redis container
+      when: "'backend' in group_names"
+      community.docker.docker_container:
+        name: redis
+        image: redis:latest
+        state: started
+
+        restart_policy: unless-stopped
+
+- name: Start PostgreSQL container
+  hosts: db
+  become: yes
+  tasks:
+    - name: Start PostgreSQL container
+      when: "'db' in group_names"
+      community.docker.docker_container:
+        name: db
+        image: postgres:latest
+        state: started
+        restart_policy: unless-stopped
+        env:
+          POSTGRES_PASSWORD: mysecretpassword
+
+    - name: Wait for Redis to be ready
+      when: "'backend' in group_names"
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 6379
+        timeout: 30
+
+    - name: Wait for PostgreSQL to be ready
+      when: "'db' in group_names"
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 5432
+        timeout: 30
+
+- name: Start Vote container
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Run voting app container
+      community.docker.docker_container:
+        name: vote
+        image: laraleo/project1/voting-app:latest
+        state: started
+        restart_policy: unless-stopped
+        env:
+          REDIS_HOST: redis
+
+- name: Start Worker container
+  hosts: backend
+  become: yes
+  tasks:
+    - name: Run worker container
+      community.docker.docker_container:
+        name: worker
+        image: laraleo/project1/worker-app:latest
+        state: started
+        restart_policy: unless-stopped
+        env:
+          REDIS_HOST: redis
+          POSTGRES_HOST: db
+
+- name: Start Result container
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Run result app container
+      community.docker.docker_container:
+        name: result
+        image: laraleo/project1/result-app:latest
+        state: started
+        restart_policy: unless-stopped
+        env:
+          POSTGRES_HOST: db
