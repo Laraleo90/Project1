@@ -43,7 +43,7 @@ resource "aws_security_group" "sg1" {
   }
 
   tags = {
-    Name = "sg1-Vote-Result-lara"
+    Name = "Vote-Result-SG-lara"
   }
 }
 
@@ -60,17 +60,16 @@ resource "aws_security_group" "sg2" {
     to_port         = 6379
     protocol        = "tcp"
     description     = "Redis access from web apps"
-    security_groups = [aws_security_group.sg1.id] 
   }
 
   # SSH for management
   ingress {
-  from_port       = 22
-  to_port         = 22
-  protocol        = "tcp"
-  description     = "SSH from frontend (bastion)"
-  security_groups = [aws_security_group.sg1.id]
-}
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip]
+    description = "SSH access - restricted to my IP"
+  }
 
   egress {
     from_port   = 0
@@ -80,7 +79,7 @@ resource "aws_security_group" "sg2" {
   }
 
   tags = {
-    Name = "sg2-Redis-Worker-lara"
+    Name = "Redis-Worker-SG-lara"
   }
 }
 
@@ -97,18 +96,17 @@ resource "aws_security_group" "sg3" {
     to_port         = 5432
     protocol        = "tcp"
     description     = "PostgreSQL access from web apps"
-    security_groups = [aws_security_group.sg2.id] 
   }
 
   # SSH
   ingress {
-  from_port       = 22
-  to_port         = 22
-  protocol        = "tcp"
-  description     = "SSH from frontend (bastion)"
-  security_groups = [aws_security_group.sg1.id]
-}
-  
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip]
+    description = "SSH access - restricted to my IP"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -117,6 +115,6 @@ resource "aws_security_group" "sg3" {
   }
 
   tags = {
-    Name = "sg3-Postgres-lara"
+    Name = "Postgres-SG-lara"
   }
 }
