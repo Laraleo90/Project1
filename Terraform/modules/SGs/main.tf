@@ -97,7 +97,7 @@ resource "aws_security_group" "sg3" {
     to_port         = 5432
     protocol        = "tcp"
     description     = "PostgreSQL access from web apps"
-    security_groups = [aws_security_group.sg2.id] 
+    security_groups = [aws_security_group.sg2.id, aws_security_group.sg1.id]  
   }
 
   # SSH
