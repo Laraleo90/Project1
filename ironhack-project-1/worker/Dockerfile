@@ -18,11 +18,15 @@ WORKDIR /app
 COPY --from=build /app/publish ./
 
 # Set environment variables (can be overridden at runtime)
+<<<<<<< Updated upstream
 ENV DB_HOST=db
 ENV DB_USERNAME=postgres
 ENV DB_PASSWORD=postgres
 ENV DB_NAME=postgres
 ENV REDIS_HOST=redis
+=======
+#deleted
+>>>>>>> Stashed changes
 
 # Define the entry point
 ENTRYPOINT ["dotnet", "Worker.dll"]

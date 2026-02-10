@@ -14,8 +14,12 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables for Redis configuration (can be overridden at runtime)
+<<<<<<< Updated upstream
 ENV REDIS_HOST=redis
 ENV REDIS_PORT=6379
+=======
+#deleted
+>>>>>>> Stashed changes
 
 # dev defines a stage for development, where it'll watch for filesystem changes
 FROM base AS dev
