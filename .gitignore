@@ -5,3 +5,7 @@
 
 ###### Private keys ######
 *.pem
+
+###### Ansible Vault ######
+.vault_pass
+*.retry   
