@@ -72,15 +72,13 @@
   tasks:
     - name: Pull voting app image
       community.docker.docker_image:
-        name: laraleo/project1:voting-appu
+        name: "{{ voting_image }}"
         source: pull
-        tag: latest
 
     - name: Pull result app image
       community.docker.docker_image:
-        name: laraleo/project1:result-appu
+        name: "{{ result_image }}"
         source: pull
-        tag: latest
 
 - name: Deploy Backend Docker images
   hosts: backend
@@ -88,15 +86,13 @@
   tasks:
     - name: Pull Redis image
       community.docker.docker_image:
-        name: redis
+        name: "{{ redis_image }}"
         source: pull
-        tag: latest
 
     - name: Pull worker app image
       community.docker.docker_image:
-        name: laraleo/project1:worker-appu
+        name: "{{ worker_image }}" 
         source: pull
-        tag: latest
 
 - name: Deploy database Docker image
   hosts: db
@@ -104,9 +100,8 @@
   tasks:
     - name: Pull PostgreSQL image
       community.docker.docker_image:
-        name: postgres
+        name: "{{ postgres_image }}" 
         source: pull
-        tag: latest
 
 
 ## Run the containers
@@ -118,11 +113,10 @@
       when: "'backend' in group_names"
       community.docker.docker_container:
         name: redis
-        image: redis:latest
+        image: "{{ redis_image }}"
         published_ports:
-          - "6379:6379"
+          - "{{ redis_port_host }}:{{ redis_port }}"
         state: started
-
         restart_policy: unless-stopped
 
 - name: Start PostgreSQL container
@@ -130,18 +124,17 @@
   become: yes
   tasks:
     - name: Start PostgreSQL container
-      when: "'db' in group_names"
       community.docker.docker_container:
         name: postgres
-        image: postgres:latest
+        image: "{{ postgres_image }}" 
         state: started
         restart_policy: unless-stopped
         ports:
-          - "5432:5432"
+          - "{{ postgres_port_host }}:{{ postgres_port }}"
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_USER: "{{ db_username }}" 
+          POSTGRES_PASSWORD: "{{ db_password }}" 
+          POSTGRES_DB: "{{ db_name }}" 
   
 
 - name: Start Vote container
@@ -151,13 +144,13 @@
     - name: Run voting app container
       community.docker.docker_container:
         name: vote
-        image: laraleo/project1:voting-appu
+        image: "{{ voting_image }}" 
         state: started
         restart_policy: unless-stopped
         ports:
-         - "8080:80"
+         - "{{ vote_port_host}}:{{ vote_port }}"
         env:
-          REDIS_HOST: 10.0.2.238
+          REDIS_HOST: "{{ redis_host }}"
 
 
 - name: Start Worker container
@@ -167,16 +160,16 @@
     - name: Run worker container
       community.docker.docker_container:
         name: worker
-        image: laraleo/project1:worker-appu
+        image: "{{ worker_image }}"
         state: started
         restart_policy: unless-stopped
         network_mode: host 
         env:
-          REDIS_HOST: 10.0.2.238   
-          DB_HOST: 10.0.2.221
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: postgres
+          REDIS_HOST: "{{ redis_host }}"    
+          DB_HOST: "{{ db_host }}"          
+          DB_USERNAME: "{{ db_username }}"  
+          DB_PASSWORD: "{{ db_password }}"
+          DB_NAME: "{{ db_name }}"   
 
 - name: Start Result container
   hosts: frontend
@@ -185,11 +178,15 @@
     - name: Run result app container
       community.docker.docker_container:
         name: result
-        image: laraleo/project1:result-appu
+        image: "{{ result_image }}" 
         state: started
         restart_policy: unless-stopped
         ports:
-        - "8081:80"
+        - "{{ result_port_host }}:{{ result_port }}"
         env:
-          POSTGRES_HOST: 10.0.2.221
-          
+          PG_HOST: "{{ db_host }}"          
+          PG_USER: "{{ db_username }}"      
+          PG_PASSWORD: "{{ db_password }}"  
+          PG_DATABASE: "{{ db_name }}"      
+          PORT: "{{ result_port }}"
+
