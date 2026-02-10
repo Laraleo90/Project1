@@ -1,11 +1,11 @@
 # IPs
-redis_host: 10.0.2.105
-db_host: 10.0.2.53
+redis_host: 10.0.2.37
+db_host: 10.0.2.182
 
 # Docker images
-voting_image: laraleo/project1:voting-appu
-result_image: laraleo/project1:result-appu
-worker_image: laraleo/project1:worker-appu
+voting_image: laraleo/project1:voting-appuv
+result_image: laraleo/project1:result-appuv
+worker_image: laraleo/project1:worker-appuv
 redis_image: redis:latest
 postgres_image: postgres:latest
 

@@ -1,6 +1,7 @@
 ---
 - name: Ping all Servers
   hosts: all
+  tags: check
   tasks:
     - name: Ping all servers to check connectivity
       ansible.builtin.ping:
@@ -8,6 +9,7 @@
 - name: Install Docker CE on Ubuntu 20.04
   hosts: all
   become: yes
+  tags: setup
   tasks:
     - name: Install prerequisites
       ansible.builtin.apt:
@@ -69,6 +71,7 @@
 - name: Deploy Frontend Docker Images
   hosts: frontend
   become: yes
+  tags: deploy
   tasks:
     - name: Pull voting app image
       community.docker.docker_image:
@@ -83,6 +86,7 @@
 - name: Deploy Backend Docker images
   hosts: backend
   become: yes
+  tags: deploy
   tasks:
     - name: Pull Redis image
       community.docker.docker_image:
@@ -97,6 +101,7 @@
 - name: Deploy database Docker image
   hosts: db
   become: yes
+  tags: deploy
   tasks:
     - name: Pull PostgreSQL image
       community.docker.docker_image:
@@ -108,6 +113,7 @@
 - name: Start container Redis
   hosts: backend
   become: yes
+  tags: run
   tasks:
     - name: Start Redis container
       when: "'backend' in group_names"
@@ -122,6 +128,7 @@
 - name: Start PostgreSQL container
   hosts: db
   become: yes
+  tags: run
   tasks:
     - name: Start PostgreSQL container
       community.docker.docker_container:
@@ -140,6 +147,7 @@
 - name: Start Vote container
   hosts: frontend
   become: yes
+  tags: run
   tasks:
     - name: Run voting app container
       community.docker.docker_container:
@@ -156,6 +164,7 @@
 - name: Start Worker container
   hosts: backend
   become: yes
+  tags: run
   tasks:
     - name: Run worker container
       community.docker.docker_container:
@@ -174,6 +183,7 @@
 - name: Start Result container
   hosts: frontend
   become: yes
+  tags: run
   tasks:
     - name: Run result app container
       community.docker.docker_container:
