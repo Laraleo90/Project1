@@ -72,17 +72,15 @@
   tasks:
     - name: Pull voting app image
       community.docker.docker_image:
-        name: laraleo/project1:voting-app
+        name: laraleo/project1:voting-appu
         source: pull
         tag: latest
-        platform: linux/amd64
 
     - name: Pull result app image
       community.docker.docker_image:
-        name: laraleo/project1:result-app
+        name: laraleo/project1:result-appu
         source: pull
         tag: latest
-        platform: linux/amd64
 
 - name: Deploy Backend Docker images
   hosts: backend
@@ -96,10 +94,9 @@
 
     - name: Pull worker app image
       community.docker.docker_image:
-        name: laraleo/project1:worker-app
+        name: laraleo/project1:worker-appu
         source: pull
         tag: latest
-        platform: linux/amd64
 
 - name: Deploy database Docker image
   hosts: db
@@ -122,6 +119,8 @@
       community.docker.docker_container:
         name: redis
         image: redis:latest
+        published_ports:
+          - "6379:6379"
         state: started
 
         restart_policy: unless-stopped
@@ -133,26 +132,17 @@
     - name: Start PostgreSQL container
       when: "'db' in group_names"
       community.docker.docker_container:
-        name: db
+        name: postgres
         image: postgres:latest
         state: started
         restart_policy: unless-stopped
+        ports:
+          - "5432:5432"
         env:
-          POSTGRES_PASSWORD: mysecretpassword
-
-    - name: Wait for Redis to be ready
-      when: "'backend' in group_names"
-      wait_for:
-        host: "{{ inventory_hostname }}"
-        port: 6379
-        timeout: 30
-
-    - name: Wait for PostgreSQL to be ready
-      when: "'db' in group_names"
-      wait_for:
-        host: "{{ inventory_hostname }}"
-        port: 5432
-        timeout: 30
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+  
 
 - name: Start Vote container
   hosts: frontend
@@ -161,11 +151,14 @@
     - name: Run voting app container
       community.docker.docker_container:
         name: vote
-        image: laraleo/project1/voting-app:latest
+        image: laraleo/project1:voting-appu
         state: started
         restart_policy: unless-stopped
+        ports:
+         - "8080:80"
         env:
-          REDIS_HOST: redis
+          REDIS_HOST: 10.0.2.238
+
 
 - name: Start Worker container
   hosts: backend
@@ -174,12 +167,16 @@
     - name: Run worker container
       community.docker.docker_container:
         name: worker
-        image: laraleo/project1/worker-app:latest
+        image: laraleo/project1:worker-appu
         state: started
         restart_policy: unless-stopped
+        network_mode: host 
         env:
-          REDIS_HOST: redis
-          POSTGRES_HOST: db
+          REDIS_HOST: 10.0.2.238   
+          DB_HOST: 10.0.2.221
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: postgres
 
 - name: Start Result container
   hosts: frontend
@@ -188,8 +185,11 @@
     - name: Run result app container
       community.docker.docker_container:
         name: result
-        image: laraleo/project1/result-app:latest
+        image: laraleo/project1:result-appu
         state: started
         restart_policy: unless-stopped
+        ports:
+        - "8081:80"
         env:
-          POSTGRES_HOST: db
+          POSTGRES_HOST: 10.0.2.221
+          
