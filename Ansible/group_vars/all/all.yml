@@ -1,11 +1,6 @@
 # IPs
-<<<<<<< HEAD
-redis_host: 10.0.2.37
-db_host: 10.0.2.182
-=======
 redis_host: 10.0.2.74
 db_host: 10.0.2.206
->>>>>>> Terraform/setup
 
 # Docker images
 voting_image: laraleo/project1:voting-appuv
