@@ -85,22 +85,6 @@ output "db_server_private_ip" {
   value       = module.ec2.db_private_ip
 }
 
-# SSH Connection Commands
-output "ssh_frontend" {
-  description = "SSH command to connect to frontend server"
-  value       = "ssh -i project1_lara.pem ubuntu@${module.ec2.frontend_public_ip}"
-}
-
-output "ssh_backend_via_frontend" {
-  description = "SSH command to connect to backend server via frontend (jump host)"
-  value       = "ssh -i project1_lara.pem -J ubuntu@${module.ec2.frontend_public_ip} ubuntu@${module.ec2.backend_private_ip}"
-}
-
-output "ssh_db_via_frontend" {
-  description = "SSH command to connect to database server via frontend (jump host)"
-  value       = "ssh -i project1_lara.pem -J ubuntu@${module.ec2.frontend_public_ip} ubuntu@${module.ec2.db_private_ip}"
-}
-
 # Application URLs
 output "vote_app_url" {
   description = "Vote application URL"

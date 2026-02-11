@@ -9,3 +9,7 @@
 ###### Ansible Vault ######
 .vault_pass
 *.retry   
+
+##### macOS system files #####
+.DS_Store
+**/.DS_Store
